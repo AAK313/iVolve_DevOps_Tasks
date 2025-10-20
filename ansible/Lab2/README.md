@@ -1,108 +1,80 @@
-# Lab 2: Automated Web Server Configuration Using Ansible Playbooks
+# Automated Web Server Configuration Using Ansible Playbooks
 
-## Overview
-This lab demonstrates how to automate the configuration of a web server using Ansible playbooks.  
-It covers installing Nginx, customizing the default web page, and verifying the configuration on a managed node.
+## Objectives
 
+- Automate web server installation and configuration using Ansible
+- Install and enable **Nginx** on a managed node
+- Deploy a custom `index.html` page
+- Verify that the web server is running correctly
 ---
+1. Playbook: `playbook1.yml`
+    ```yaml
+    ---
+    - name: Configure Nginx Web Server
+      hosts: dev
+      become: yes  # Run as root
+      tasks:
 
-## Step 1: Prepare Your Inventory
-Ensure your inventory file (`inventory.ini`) contains the managed nodes under a group, for example:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
 
-[dev]
-managed_node_ip ansible_user=user ansible_ssh_private_key_file=~/.ssh/ansible_key
+    - name: Ensure Nginx is running and enabled
+      service:
+        name: nginx
+        state: started
+        enabled: yes
 
-yaml
-Copy code
+    - name: Customize the default web page
+      copy:
+        dest: /var/www/html/index.html
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Welcome to My Automated Web Server!</title>
+              <style>
+                  body { font-family: Arial; background: #f4f4f4; text-align: center; padding-top: 50px; }
+                  h1 { color: #0078D7; }
+              </style>
+          </head>
+          <body>
+              <h1>🚀 Nginx is running — configured by Ansible!</h1>
+              <p>This page was deployed automatically.</p>
+          </body>
+          </html>
 
-- Replace `managed_node_ip` and `user` with your managed node IP and username.
+    - name: Verify Nginx is serving the customized page
+      uri:
+        url: http://localhost
+        return_content: yes
+      register: webpage
 
----
+    - name: Display the web page content (for verification)
+      debug:
+        msg: "{{ webpage.content }}"
 
-## Step 2: Write the Ansible Playbook
-Create a file named `playbook1.yml` with the following content:
 
-name: Configure Nginx Web Server
-hosts: dev
-become: yes # Run as root
-tasks:
 
-name: Install Nginx
-apt:
-name: nginx
-state: present
-update_cache: yes
 
-name: Ensure Nginx is running and enabled
-service:
-name: nginx
-state: started
-enabled: yes
 
-name: Customize the default web page
-copy:
-dest: /var/www/html/index.html
-content: |
-<!DOCTYPE html>
-<html>
-<head>
-<title>Welcome to My Automated Web Server!</title>
-<style>
-body { font-family: Arial; background: #f4f4f4; text-align: center; padding-top: 50px; }
-h1 { color: #0078D7; }
-</style>
-</head>
-<body>
-<h1>🚀 Nginx is running — configured by Ansible!</h1>
-<p>This page was deployed automatically.</p>
-</body>
-</html>
+2. **Create an Inventory File** `inventory.ini`:
+   ```ini
+   [hosts]
+   192.168.1.105
+   
 
-name: Verify Nginx is serving the customized page
-uri:
-url: http://localhost
-return_content: yes
-register: webpage
-
-name: Display the web page content (for verification)
-debug:
-msg: "{{ webpage.content }}"
-
-yaml
-Copy code
-
----
-
-## Step 3: Run the Playbook
-Execute the playbook on your managed node:
-
-ansible-playbook -i inventory.ini playbook1.yml
-
-yaml
-Copy code
-
-- Ansible will install Nginx, start the service, customize the web page, and verify the page content.
-
----
-
-## Step 4: Verify the Web Server
-- Open a browser or use `curl` on the managed node to check the web page:
-
-curl http://managed_node_ip
-
-yaml
-Copy code
-
-- You should see the custom HTML content defined in the playbook.
-
----
-
-## Notes
-- Ensure SSH access works and the inventory is correctly configured.  
-- Playbooks allow repeatable and automated server configuration.  
-- The `uri` module helps verify that the server is serving the correct content.
-
----
+3. Run the Playbook:
+   ```bash
+   ansible-playbook -i inventory.ini playbook1.yml --ask-become-pass
+   
+   `--ask-become-pass` → ask for SSH password (if no key-based authentication).
+   
+4. **Verify Configuration**: 
+   ```bash
+   curl http://192.168.1.105
 
 ## References
 - [Ansible Documentation](https://docs.ansible.com/)  
