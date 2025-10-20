@@ -11,62 +11,46 @@
 
 ```yaml
 ---
-- name: Secure MySQL Setup with Ansible Vault
-  hosts: all
-  become: yes
+- name: Configure MySQL DB
+  hosts: dev
+  become: true
   vars_files:
-    - group_vars/all/vault.yml
+    - secrets.yaml
 
   tasks:
-    - name: Install MySQL server
+    - name: Install MySQL and Python MySQL library
       apt:
-        name: mysql-server
-        state: present
-        update_cache: yes
-
-    - name: Install Python MySQL dependencies
-      apt:
-        name: python3-pymysql
+        name:
+          - mysql-server
+          - python3-mysqldb
         state: present
 
-    - name: Ensure MySQL service is running
+    - name: Start MySQL service
       service:
         name: mysql
         state: started
-        enabled: yes
 
-    - name: Create iVolve database
-      community.mysql.mysql_db:
-        name: "{{ db_name }}"
+    - name: Create MySQL user
+      mysql_user:
+        name: amr
+        password: "{{ database_password }}"
+        host: localhost
+        priv: "*.*:ALL,GRANT"  
         state: present
-        login_unix_socket: /var/run/mysqld/mysqld.sock
 
-    - name: Create user with privileges
-      community.mysql.mysql_user:
-        name: "{{ db_user }}"
-        password: "{{ db_password }}"
-        priv: "{{ db_name }}.*:ALL"
+    - name: Create MySQL database 'ivolve'
+      mysql_db:
+        name: ivolve
         state: present
+        login_user: root
         login_unix_socket: /var/run/mysqld/mysqld.sock
-
-    - name: Validate DB connection and list databases
-      community.mysql.mysql_query:
-        login_user: "{{ db_user }}"
-        login_password: "{{ db_password }}"
-        query: "SHOW DATABASES;"
-      register: db_list
-
-    - name: Display databases
-      debug:
-        var: db_list.query_result
 ```
 
-## Vault File: `group_vars/all/vault.yml`
+## Vault File: `secrets.yaml`
 
-```yml
-db_name: iVolve
-db_user: ivolve_user
-db_password: 1234
+```yaml
+name: amr
+database_password: "2002"
 ```
 
 ## Steps
@@ -74,13 +58,13 @@ db_password: 1234
 1. **Encrypt Vault File** (if not already encrypted):
 
 ```bash
-ansible-vault encrypt group_vars/all/vault.yml
+ansible-vault encrypt secrets.yaml
 ```
 
 2. **Run Playbook**:
 
 ```bash
-ansible-playbook -i inventory.ini secure_mysql.yml --ask-vault-pass
+ansible-playbook -i inventory.ini playbook3.yaml --ask-become-pass --ask-vault-pass
 ```
 
 3. **Verify Database**:
@@ -92,7 +76,7 @@ mysql -u ivolve_user -p -e "SHOW DATABASES;"
 - ### Optional: To Edit the Vault Later
   
   ```bash
-  ansible-vault edit group_vars/all/vault.yml
+  ansible-vault edit secrets.yml
   ```
   
   ## Notes
