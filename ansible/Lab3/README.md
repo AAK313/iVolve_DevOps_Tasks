@@ -30,12 +30,3 @@ ssh amr@192.168.1.105 kubectl version --client
 ssh amr@192.168.1.105 jenkins --version
 
 ```
-### References
-
-Ansible Roles Documentation
-
-Docker Official Documentation
-
-Kubernetes Official Documentation
-
-Jenkins Official Documentation
