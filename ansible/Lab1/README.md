@@ -1,5 +1,4 @@
 
-
 # Lab 1: Initial Ansible Configuration and Ad-Hoc Execution
 
 ## Overview
@@ -10,57 +9,84 @@ This lab demonstrates the initial setup and basic functionality of Ansible Autom
 ## Step 1: Install Ansible on Control Node
 Install Ansible on your control node and verify the installation.
 
-
 sudo apt update
 sudo apt install ansible -y
 ansible --version
 
-### Step 2: Generate SSH Key Pair
+yaml
+Copy code
+
+---
+
+## Step 2: Generate SSH Key Pair
 Create an SSH key pair for secure passwordless authentication.
 
-
-Copy code
 ssh-keygen -t rsa -b 2048 -f ~/.ssh/ansible_key
-Press Enter to accept the default location.
 
-Optionally, set a passphrase.
+pgsql
+Copy code
 
-### Step 3: Copy Public Key to Managed Node
+- Press **Enter** to accept the default location.  
+- Optionally, set a passphrase.
+
+---
+
+## Step 3: Copy Public Key to Managed Node
 Transfer the public key to your managed node so Ansible can connect without a password.
 
-
-Copy code
 ssh-copy-id -i ~/.ssh/ansible_key.pub user@managed_node_ip
-Replace user@managed_node_ip with the managed node username and IP address.
 
-### Step 4: Create Inventory File
-Create an inventory.ini file in your repo to define the managed nodes.
-
-ini
+yaml
 Copy code
+
+- Replace `user@managed_node_ip` with the managed node username and IP address.
+
+---
+
+## Step 4: Create Inventory File
+Create an `inventory.ini` file in your repo to define the managed nodes.
+
 [managed_nodes]
 managed_node_ip ansible_user=user 
-Replace managed_node_ip and user with the managed node IP and username.
 
-### Step 5: Test Connectivity with Ping
+yaml
+Copy code
+
+- Replace `managed_node_ip` and `user` with the managed node IP and username.
+
+---
+
+## Step 5: Test Connectivity with Ping
 Verify Ansible can reach the managed node using the ping module.
 
-
-Copy code
 ansible all -i inventory.ini -m ping
-Expected output: pong from the managed node.
 
-### Step 6: Run Ad-Hoc Command to Check Disk Space
+yaml
+Copy code
+
+- Expected output: `pong` from the managed node.
+
+---
+
+## Step 6: Run Ad-Hoc Command to Check Disk Space
 Execute an ad-hoc command to check disk usage on the managed node.
 
-
-Copy code
 ansible all -i inventory.ini -m shell -a "df -h"
-This displays disk usage information.
 
-Notes
-Ensure SSH access works before running Ansible commands.
+yaml
+Copy code
 
-Ad-hoc commands are useful for quick checks and troubleshooting before creating playbooks.
+- This displays disk usage information.
 
-All commands assume the use of a private SSH key for passwordless authentication.
+---
+
+## Notes
+- Ensure SSH access works before running Ansible commands.  
+- Ad-hoc commands are useful for quick checks and troubleshooting before creating playbooks.  
+- All commands assume the use of a private SSH key for passwordless authentication.
+
+---
+
+## References
+- [Ansible Documentation](https://docs.ansible.com/)  
+- [SSH Key Authentication](https://www.ssh.com/academy/ssh/keygen)
