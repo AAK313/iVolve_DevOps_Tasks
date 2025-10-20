@@ -1,0 +1,50 @@
+---
+- name: Add Jenkins repository key (modern secure method)
+  ansible.builtin.shell: |
+    curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key \
+      | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+  args:
+    creates: /usr/share/keyrings/jenkins-keyring.asc
+
+- name: Add Jenkins repository to sources list
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/jenkins.list
+    content: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install Java and Jenkins
+  ansible.builtin.apt:
+    name:
+      - fontconfig
+      - openjdk-17-jdk
+      - jenkins
+    state: present
+
+- name: Ensure Jenkins service is started and enabled
+  ansible.builtin.service:
+    name: jenkins
+    state: started
+    enabled: yes
+
+- name: Wait for Jenkins initial password file
+  ansible.builtin.wait_for:
+    path: /var/lib/jenkins/secrets/initialAdminPassword
+    state: present
+    timeout: 60
+
+- name: Display Jenkins initial admin password
+  ansible.builtin.command: cat /var/lib/jenkins/secrets/initialAdminPassword
+  register: jenkins_password
+
+- name: Show Jenkins initial password in output
+  ansible.builtin.debug:
+    msg: |
+      Jenkins is installed and running at: http://{{ ansible_default_ipv4.address }}:8080
+      Initial admin password: {{ jenkins_password.stdout }}
+
