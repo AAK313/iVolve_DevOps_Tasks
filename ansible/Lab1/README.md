@@ -29,7 +29,7 @@ sudo apt update
 sudo apt install ansible -y
 ansible --version
 
-2. Generate SSH Key Pair
+### 2. Generate SSH Key Pair
 bash
 Copy code
 ssh-keygen -t rsa -b 2048 -f ~/.ssh/ansible_key
@@ -37,13 +37,13 @@ Press Enter to accept default location.
 
 Optionally, set a passphrase.
 
-3. Copy Public Key to Managed Node
+### 3. Copy Public Key to Managed Node
 bash
 Copy code
 ssh-copy-id -i ~/.ssh/ansible_key.pub user@managed_node_ip
 Replace user@managed_node_ip with your managed node username and IP address.
 
-4. Create Inventory File
+### 4. Create Inventory File
 Create inventory.ini in your repo:
 
 ini
@@ -52,13 +52,13 @@ Copy code
 managed_node_ip ansible_user=user 
 Replace managed_node_ip and user with your managed node IP and username.
 
-5. Test Connectivity with Ping
+### 5. Test Connectivity with Ping
 bash
 Copy code
 ansible all -i inventory.ini -m ping
 Expected output: pong from the managed node.
 
-6. Run Ad-Hoc Command to Check Disk Space
+### 6. Run Ad-Hoc Command to Check Disk Space
 bash
 Copy code
 ansible all -i inventory.ini -m shell -a "df -h"
