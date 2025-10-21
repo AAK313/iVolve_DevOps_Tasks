@@ -21,7 +21,7 @@ This command generates the JAR file located at:
 target/demo-0.0.1-SNAPSHOT.jar
 
 ## 3. Write Dockerfile
-
+```bash
 Create a Dockerfile in the project root and include the following commands.
 
 Dockerfile Commands Explanation:
@@ -35,7 +35,7 @@ COPY target/demo-0.0.1-SNAPSHOT.jar app.jar → Copy the locally built JAR file 
 EXPOSE 8080 → Expose port 8080 for application access.
 
 ENTRYPOINT ["java", "-jar", "app.jar"] → Run the Spring Boot JAR when the container starts.
-
+```
 ## 4. Build Docker Image
 
 Build the image and tag it as app2-image.
