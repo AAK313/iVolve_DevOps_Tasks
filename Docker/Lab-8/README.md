@@ -29,7 +29,7 @@ RUN mvn package → Build the application inside the container using Maven, prod
 EXPOSE 8080 → Expose port 8080 so the app can receive traffic.
 
 ENTRYPOINT ["java", "-jar", "target/demo-0.0.1-SNAPSHOT.jar"] → Run the Spring Boot application JAR when the container starts.
-```bash
+```
 
 As we see this lab isn't best practise to add all source code to the container and adding a layer to build the code
 
