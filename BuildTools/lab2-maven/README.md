@@ -1,4 +1,4 @@
-Lab 7: Building and Packaging Java Applications with Maven</strong></summary>
+### Lab 7: Building and Packaging Java Applications with Maven</strong></summary>
 
 ### Objective
 
