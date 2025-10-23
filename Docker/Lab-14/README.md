@@ -11,7 +11,7 @@ The app requires a database named **ivolve** to start properly.
 git clone https://github.com/Ibrahim-Adel15/kubernets-app.git
 cd kubernets-app
 ```
-###Step 2: Create Dockerfile
+### Step 2: Create Dockerfile
 If not already available, create a Dockerfile for the Node.js app.
 
 dockerfile
@@ -100,7 +100,7 @@ docker exec -it node_app cat /app/logs/access.log
 ```bash
 docker login
 ```
-###Find the Image
+Find the Image
 ```bash
 docker images
 ```
@@ -117,5 +117,6 @@ docker push <your_dockerhub_username>/kubernets-app-app
 ```
 ### Verify on DockerHub
 Visit your DockerHub account → Repositories → Confirm that kubernets-app has been uploaded successfully.
+
 ![App Screenshot](./screenshot2.png)
 
