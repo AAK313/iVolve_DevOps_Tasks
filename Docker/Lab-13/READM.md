@@ -12,10 +12,11 @@ Run multiple containers with different networks.
 Verify container communication and network isolation.
 
 ### Step 1: Clone the Application Code
+```
 git clone https://github.com/Ibrahim-Adel15/Docker5.git
 
 cd Docker5
-
+```
 ### Step 2: Write Dockerfile for Frontend
 
 Create frontend/dockerfile.frontend:
