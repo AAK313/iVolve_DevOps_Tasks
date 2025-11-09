@@ -8,9 +8,9 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "mohamedelrefy20/lab31"
+        IMAGE_NAME = "amrk13/lab31"
         K8S_DEPLOYMENT_FILE = "deployment.yml"
-        PROJECT_DIR = "Jenkins/lab31"
+        PROJECT_DIR = "Jenkins/Lab-31"
     }
 
     stages {
@@ -21,7 +21,7 @@ pipeline {
                     buildAPP(env.PROJECT_DIR)
                     buildDockerImage(env.IMAGE_NAME, env.BUILD_NUMBER, env.PROJECT_DIR)
                     scanImage(env.IMAGE_NAME, env.BUILD_NUMBER)
-                    pushDockerImage(env.IMAGE_NAME, env.BUILD_NUMBER, 'Docker_Secret')
+                    pushDockerImage(env.IMAGE_NAME, env.BUILD_NUMBER, 'dockerhub-cred')
                     removeLocalImage(env.IMAGE_NAME, env.BUILD_NUMBER)
                     updateDeploymentYaml(env.PROJECT_DIR, env.K8S_DEPLOYMENT_FILE, env.IMAGE_NAME, env.BUILD_NUMBER)
                     deployOnK8s(env.PROJECT_DIR, env.K8S_DEPLOYMENT_FILE, 'SA-TOKEN', 'API-SERVER')
