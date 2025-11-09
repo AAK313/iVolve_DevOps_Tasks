@@ -1,0 +1,102 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'maven'
+    }
+
+    environment {
+        IMAGE_NAME = "amrk13/lab-30"
+        K8S_DEPLOYMENT_FILE = "deployment.yml"
+        PROJECT_DIR = "Jenkins/Lab-30"
+    }
+
+    stages {
+
+        stage('Run Unit Tests') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    sh 'mvn test'
+                }
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    sh 'mvn package'
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
+                }
+            }
+        }
+
+        stage('Push Image to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'Docker_Secret', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+                        docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+                    """
+                }
+            }
+        }
+
+        stage('Delete Local Image') {
+            steps {
+                sh "docker rmi -f ${IMAGE_NAME}:${BUILD_NUMBER}"
+            }
+        }
+
+        stage('Update deployment.yaml') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    script {
+                        sh """
+                            sed -i 's|image: .*|image: ${IMAGE_NAME}:${BUILD_NUMBER}|g' ${K8S_DEPLOYMENT_FILE}
+                            echo "Updated deployment file:"
+                            cat ${K8S_DEPLOYMENT_FILE}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    withCredentials([
+                        string(credentialsId: 'SA-TOKEN', variable: 'TOKEN'),
+                        string(credentialsId: 'API-SERVER', variable: 'APISERVER')
+                    ]) {
+                        sh """
+                            kubectl --token="$TOKEN" \
+                                    --server="$APISERVER" \
+                                    --insecure-skip-tls-verify=true \
+                                    apply -f ${K8S_DEPLOYMENT_FILE}
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline finished — cleaning workspace"
+            cleanWs()
+        }
+        success {
+            echo "✅ Deployment succeeded!"
+        }
+        failure {
+            echo "❌ Pipeline failed — check the logs!"
+        }
+    }
+}
