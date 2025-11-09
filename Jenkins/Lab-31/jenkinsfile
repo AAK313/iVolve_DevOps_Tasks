@@ -1,0 +1,45 @@
+@Library('lab31') _
+
+pipeline {
+    agent any
+
+    tools {
+        maven 'maven'
+    }
+
+    environment {
+        IMAGE_NAME = "mohamedelrefy20/lab31"
+        K8S_DEPLOYMENT_FILE = "deployment.yml"
+        PROJECT_DIR = "Jenkins/lab31"
+    }
+
+    stages {
+        stage('Pipeline Stages') {
+            steps {
+                script {
+                    runUnitTests(env.PROJECT_DIR)
+                    buildAPP(env.PROJECT_DIR)
+                    buildDockerImage(env.IMAGE_NAME, env.BUILD_NUMBER, env.PROJECT_DIR)
+                    scanImage(env.IMAGE_NAME, env.BUILD_NUMBER)
+                    pushDockerImage(env.IMAGE_NAME, env.BUILD_NUMBER, 'Docker_Secret')
+                    removeLocalImage(env.IMAGE_NAME, env.BUILD_NUMBER)
+                    updateDeploymentYaml(env.PROJECT_DIR, env.K8S_DEPLOYMENT_FILE, env.IMAGE_NAME, env.BUILD_NUMBER)
+                    deployOnK8s(env.PROJECT_DIR, env.K8S_DEPLOYMENT_FILE, 'SA-TOKEN', 'API-SERVER')
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline finished — cleaning workspace"
+            cleanWs()
+        }
+        success {
+            echo "✅ Deployment succeeded!"
+        }
+        failure {
+            echo "❌ Pipeline failed — check the logs!"
+        }
+    }
+}
